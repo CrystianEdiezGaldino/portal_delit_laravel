@@ -61,9 +61,46 @@
     .user-info {
         margin-top: 10px;
         font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
     }
-    .user-info p {
-        margin-bottom: 5px;
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+
+    .user-details {
+        flex: 1;
+    }
+
+    .user-name {
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+
+    .user-role {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 1rem;
+        padding: 0 10px;
     }
 </style>
 
@@ -77,8 +114,6 @@
             <i class="bi bi-chevron-left"></i>
         </button>
     </div>
-
-   
 
     <ul class="nav-menu">
         <!-- Dashboard -->

@@ -93,7 +93,7 @@ class Controlador extends Controller
         }
 
         $data = [
-            'current_page' => $page,
+            'current_page' => ucfirst(str_replace(['.', '_'], ' ', request()->route()->getName())),
             'user_data' => Auth::user()
         ];
 

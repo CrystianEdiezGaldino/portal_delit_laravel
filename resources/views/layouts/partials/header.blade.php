@@ -1,21 +1,43 @@
+@php
+    $routeName = Route::currentRouteName();
+    $titles = [
+        'dashboard' => 'Dashboard',
+        'tutorials' => 'Tutoriais',
+        'financial.dashboard' => 'Dashboard Financeiro',
+        'financial.fees' => 'Taxas',
+        'financial.receipts' => 'Recibos',
+        'financial.receipts.create' => 'Gerar Recibo',
+        'financial.reports' => 'Relatórios',
+        'virtual.card' => 'Carteira Virtual',
+        'calendar' => 'Calendário',
+        'bulletins' => 'Boletins',
+        'publications' => 'Publicações',
+        'members' => 'Membros',
+        'members.active' => 'Membros Ativos',
+        'members.inactive' => 'Membros Inativos',
+        'registration' => 'Cadastro',
+        'delegacies' => 'Delegacias',
+        'contact' => 'Contato',
+        'club' => 'Clube Montezuma',
+        'iead.index' => 'IEAD - Instruções',
+        'annuities' => 'Anuidades',
+        'elevations' => 'Elevações',
+        'digital.diploma' => 'Diploma Digital',
+        'tickets' => 'Chamados',
+        'tickets.create' => 'Abrir Chamado',
+        'user.profile' => 'Perfil',
+        'user.settings' => 'Configurações',
+        'notifications' => 'Notificações'
+    ];
+    
+    $pageTitle = $titles[$routeName] ?? ucfirst(str_replace(['.', '_'], ' ', $routeName));
+@endphp
+
 <header class="main-header">
     <div class="d-flex align-items-center">
-        <h1 class="page-title">{{ $title ?? 'Dashboard' }}</h1>
+        <h1 class="page-title">{{ $pageTitle }}</h1>
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                @if(isset($breadcrumb))
-                    @foreach($breadcrumb as $item)
-                        <li class="breadcrumb-item {{ $loop->last ? 'active' : '' }}">
-                            @if(!$loop->last)
-                                <a href="{{ $item['url'] }}">{{ $item['title'] }}</a>
-                            @else
-                                {{ $item['title'] }}
-                            @endif
-                        </li>
-                    @endforeach
-                @endif
-            </ol>
+           
         </nav>
     </div>
     <div class="header-actions">
