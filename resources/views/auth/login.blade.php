@@ -91,7 +91,7 @@
                         <div class="mb-4">
                             <label class="form-label">IME (CIM)</label>
                             <input type="text" class="form-control form-control-lg @error('ime') is-invalid @enderror" 
-                                   name="ime" value="{{ old('ime') }}" required placeholder="Digite seu IME">
+                                   name="ime" id="ime" value="{{ old('ime') }}" required placeholder="000.000">
                             @error('ime')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
@@ -144,7 +144,7 @@
                         @csrf
                         <div class="mb-3">
                             <label class="form-label">IME (CIM)</label>
-                            <input type="text" class="form-control ime-mask" name="ime" 
+                            <input type="text" class="form-control ime-mask" name="ime" id="modalIme"
                                    placeholder="000.000" required>
                         </div>
                         <div class="mb-3">
@@ -177,8 +177,31 @@
 
         // Máscaras de input
         $(document).ready(function(){
+            // Máscara para CPF
             $('.cpf-mask').mask('000.000.000-00', {reverse: true});
+            
+            // Máscara para IME
             $('.ime-mask').mask('000.000', {reverse: true});
+            
+            // Formatar IME antes de enviar o formulário
+            $('#firstAccessForm').on('submit', function(e) {
+                let ime = $('#modalIme').val();
+                // Remove todos os caracteres não numéricos
+                ime = ime.replace(/\D/g, '');
+                // Formata para o padrão 000.000
+                ime = ime.replace(/(\d{3})(\d{3})/, '$1.$2');
+                $('#modalIme').val(ime);
+            });
+
+            // Formatar IME no formulário principal
+            $('form').on('submit', function(e) {
+                let ime = $('#ime').val();
+                // Remove todos os caracteres não numéricos
+                ime = ime.replace(/\D/g, '');
+                // Formata para o padrão 000.000
+                ime = ime.replace(/(\d{3})(\d{3})/, '$1.$2');
+                $('#ime').val(ime);
+            });
         });
 
         // Gerenciamento de alertas

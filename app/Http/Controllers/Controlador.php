@@ -1264,13 +1264,16 @@ session()->forget(['error', 'success']);
                 return back()->withInput()->with('error', 'IME não encontrado. Verifique as informações ou entre em contato com o administrador.');
             }
             
-            if ($pkUsuario->cic !== $cpf) {
+            // Remove caracteres especiais do CIC para comparação
+            $cicLimpo = preg_replace('/[^0-9]/', '', $pkUsuario->cic);
+         
+            if ($cicLimpo !== $cpf) {
                 return back()->withInput()->with('error', 'CPF não confere com o IME informado. Verifique as informações.');
             }
             
             // Agora verifica na tabela usuarios
             $usuario = Usuario::where('ime', $ime)->first();
-            
+      
             if (!$usuario) {
                 return back()->withInput()->with('error', 'Usuário não encontrado. Entre em contato com o administrador.');
             }
