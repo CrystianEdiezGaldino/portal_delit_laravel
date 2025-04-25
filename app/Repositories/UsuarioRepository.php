@@ -3,101 +3,45 @@
 namespace App\Repositories;
 
 use App\Models\Usuario;
-use App\Models\PkUsuario;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class UsuarioRepository
 {
-    protected $usuario;
-    protected $pkUsuario;
+    protected $model;
 
-    public function __construct(Usuario $usuario, PkUsuario $pkUsuario)
+    public function __construct(Usuario $model)
     {
-        $this->usuario = $usuario;
-        $this->pkUsuario = $pkUsuario;
+        $this->model = $model;
     }
 
-    public function criarUsuario($dados)
+    public function criar(array $dados)
     {
-        try {
-            DB::beginTransaction();
-
-            $usuario = $this->usuario->create([
-                'ime' => $dados['ime'],
-                'nome' => $dados['nome'],
-                'email' => $dados['email'],
-                'senha' => md5($dados['senha']),
-                'role' => $dados['role'] ?? 'usuario',
-                'status' => 'ativo'
-            ]);
-
-            $this->pkUsuario->create([
-                'ime_num' => $dados['ime'],
-                'cadastro' => $dados['nome'],
-                'email' => $dados['email'],
-                'ativo_no_grau' => $dados['grau'] ?? 1
-            ]);
-
-            DB::commit();
-            return $usuario;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        return $this->model->create($dados);
     }
 
-    public function atualizarUsuario($ime, $dados)
+    public function atualizar($id, array $dados)
     {
-        try {
-            DB::beginTransaction();
-
-            $usuario = $this->usuario->where('ime', $ime)->first();
-            $usuario->update([
-                'nome' => $dados['nome'],
-                'email' => $dados['email'],
-                'role' => $dados['role'] ?? $usuario->role,
-                'grau' => $dados['grau'] ?? $usuario->grau
-            ]);
-
-            $this->pkUsuario->where('ime_num', $ime)->update([
-                'cadastro' => $dados['nome'],
-                'email' => $dados['email'],
-                'ativo_no_grau' => $dados['grau'] ?? 1
-            ]);
-
-            DB::commit();
-            return $usuario;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
-    }
-
-    public function deletarUsuario($ime)
-    {
-        try {
-            DB::beginTransaction();
-
-            $this->usuario->where('ime', $ime)->delete();
-            $this->pkUsuario->where('ime_num', $ime)->delete();
-
-            DB::commit();
-            return true;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        $usuario = $this->model->findOrFail($id);
+        $usuario->update($dados);
+        return $usuario;
     }
 
     public function buscarPorIme($ime)
     {
-        return $this->usuario->where('ime', $ime)->first();
+        return $this->model->where('ime', $ime)->first();
+    }
+
+    public function deletar($id)
+    {
+        $usuario = $this->model->findOrFail($id);
+        $usuario->delete();
+        return true;
     }
 
     public function listarUsuarios($filtros = [])
     {
-        $query = $this->usuario->query();
+        $query = $this->model->query();
 
         if (!empty($filtros['nome'])) {
             $query->where('nome', 'like', "%{$filtros['nome']}%");

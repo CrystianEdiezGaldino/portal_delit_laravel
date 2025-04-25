@@ -22,6 +22,7 @@ use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Controlador;
 use App\Http\Controllers\FixCaminhoArquivosController;
+use App\Http\Controllers\CadastroController;
 
 // Authentication Routes
 Route::get('/', [Controlador::class, 'login'])->name('login');
@@ -86,14 +87,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
         
         // Cadastro de usuários
-        Route::get('/usuarios/cadastrar', [Controlador::class, 'cadastrarUsuario'])->name('cadastrar.usuario');
-        Route::post('/usuarios/cadastrar', [Controlador::class, 'cadastrarUsuario']);
-        Route::get('/usuarios/cadastrar/pk/{ime}', [Controlador::class, 'cadastrarPkUsuario'])->name('cadastrar.pk.usuario');
-        Route::post('/usuarios/cadastrar/pk/{ime}', [Controlador::class, 'cadastrarPkUsuario']);
-        Route::get('/usuarios/listar', [Controlador::class, 'listarUsuarios'])->name('listar.usuarios');
-        Route::get('/usuarios/editar/{ime}', [Controlador::class, 'editarUsuario'])->name('editar.usuario');
-        Route::post('/usuarios/editar/{id}', [Controlador::class, 'salvarEdicaoUsuario'])->name('salvar.edicao.usuario');
-        Route::get('/usuarios/deletar/{ime}', [Controlador::class, 'deletarUsuario'])->name('deletar.usuario');
+        Route::prefix('cadastro')->group(function () {
+            Route::get('/etapa1', [CadastroController::class, 'etapa1'])->name('cadastro.etapa1');
+            Route::post('/etapa1', [CadastroController::class, 'etapa1Process'])->name('cadastro.etapa1.process');
+            Route::get('/etapa2/{ime}', [CadastroController::class, 'etapa2'])->name('cadastro.etapa2');
+            Route::post('/etapa2/{ime}', [CadastroController::class, 'etapa2Process'])->name('cadastro.etapa2.process');
+        });
+
+        // Listagem e gerenciamento de usuários
+        Route::prefix('usuarios')->group(function () {
+            Route::get('/listar', [CadastroController::class, 'listarUsuarios'])->name('listar.usuarios');
+            Route::get('/editar/{ime}', [CadastroController::class, 'editarUsuario'])->name('editar.usuario');
+            Route::post('/salvar/{ime}', [CadastroController::class, 'salvarEdicaoUsuario'])->name('salvar.edicao.usuario');
+            Route::delete('/deletar/{ime}', [CadastroController::class, 'deletarUsuario'])->name('deletar.usuario');
+        });
         
         // Planilhas
         Route::get('/planilhas', [Controlador::class, 'planilhas'])->name('planilhas');
@@ -119,3 +126,22 @@ Route::middleware(['auth'])->group(function () {
 
 // Rota temporária para migrar caminhos de arquivos
 Route::get('/fix-caminhos-arquivos', [FixCaminhoArquivosController::class, 'migrarArquivos']);
+
+// Rotas de cadastro
+Route::get('/cadastro/etapa1', [CadastroController::class, 'etapa1'])->name('cadastro.etapa1');
+Route::post('/cadastro/etapa1/process', [CadastroController::class, 'etapa1Process'])->name('cadastro.etapa1.process');
+Route::get('/cadastro/etapa2/{ime}', [CadastroController::class, 'etapa2'])->name('cadastro.etapa2');
+Route::post('/cadastro/etapa2/process/{ime}', [CadastroController::class, 'etapa2Process'])->name('cadastro.etapa2.process');
+Route::get('/cadastro/sucesso/{ime}', [CadastroController::class, 'sucesso'])->name('cadastro.sucesso');
+Route::post('/cadastro/enviar-senha/{ime}', [CadastroController::class, 'enviarSenha'])->name('cadastro.enviar-senha');
+
+// Rotas de gerenciamento de usuários
+Route::prefix('usuarios')->group(function () {
+    Route::get('/listar', [CadastroController::class, 'listarUsuarios'])->name('listar.usuarios');
+    Route::get('/editar/{ime}', [CadastroController::class, 'editarUsuario'])->name('editar.usuario');
+    Route::post('/salvar/{ime}', [CadastroController::class, 'salvarEdicaoUsuario'])->name('salvar.edicao.usuario');
+    Route::delete('/deletar/{ime}', [CadastroController::class, 'deletarUsuario'])->name('deletar.usuario');
+});
+
+// Rota de primeiro acesso
+Route::post('/primeiro-acesso', [CadastroController::class, 'primeiroAcesso'])->name('primeiro.acesso');

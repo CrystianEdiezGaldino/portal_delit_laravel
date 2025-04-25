@@ -204,10 +204,17 @@
 
         <!-- Cadastro -->
         <li class="nav-item">
-            <a href="{{ route('registration') }}" class="nav-link {{ request()->routeIs('registration') ? 'active' : '' }}">
+            <a href="#registrationSubmenu" class="nav-link {{ request()->routeIs('cadastro.*') ? 'active' : '' }}" data-bs-toggle="collapse" aria-expanded="false">
                 <i class="bi bi-person-plus"></i>
                 <span>Cadastro</span>
+                <i class="bi bi-chevron-down menu-arrow"></i>
             </a>
+            <ul class="submenu collapse {{ request()->routeIs('cadastro.*') ? 'show' : '' }}" id="registrationSubmenu">
+                <hr class="sidebar-divider">
+                <li><a href="{{ route('cadastro.etapa1') }}" class="{{ request()->routeIs('cadastro.etapa1') ? 'active' : '' }}"><i class="bi bi-person-plus"></i> Novo Usuário</a></li>
+                <li><a href="{{ route('listar.usuarios') }}" class="{{ request()->routeIs('listar.usuarios') ? 'active' : '' }}"><i class="bi bi-list"></i> Listar Usuários</a></li>
+                <hr class="sidebar-divider">
+            </ul>
         </li>
 
         <!-- Delegacias -->

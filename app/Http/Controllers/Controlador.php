@@ -27,6 +27,7 @@ use App\Services\ContatoService;
 use App\Services\PrimeiroAcessoService;
 use App\Services\FinanceiroService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class Controlador extends Controller
 {
@@ -1068,23 +1069,28 @@ session()->forget(['error', 'success']);
             abort(404);
         }
 
-        $filtros = $request->only(['nome', 'ime', 'grau']);
+        $filtros = [
+            'nome' => $request->input('nome', ''),
+            'ime' => $request->input('ime', ''),
+            'grau' => $request->input('grau', '')
+        ];
         
         $usuarios = Usuario::query()
-            ->when($filtros['nome'], function($query, $nome) {
-                return $query->where('nome', 'like', "%{$nome}%");
+            ->when(!empty($filtros['nome']), function($query) use ($filtros) {
+                return $query->where('nome', 'like', "%{$filtros['nome']}%");
             })
-            ->when($filtros['ime'], function($query, $ime) {
-                return $query->where('ime', 'like', "%{$ime}%");
+            ->when(!empty($filtros['ime']), function($query) use ($filtros) {
+                return $query->where('ime', 'like', "%{$filtros['ime']}%");
             })
-            ->when($filtros['grau'], function($query, $grau) {
-                return $query->where('grau', $grau);
+            ->when(!empty($filtros['grau']), function($query) use ($filtros) {
+                return $query->where('grau', $filtros['grau']);
             })
             ->paginate(100);
         
-        return $this->loadPage('listar_usuarios', [
+        return view('cadastro.listar_usuarios', [
             'usuarios' => $usuarios,
-            'total_usuarios' => $usuarios->total()
+            'total_usuarios' => $usuarios->total(),
+            'filtros' => $filtros
         ]);
     }
 
@@ -1328,5 +1334,83 @@ session()->forget(['error', 'success']);
                 ->where('ime_num', $ime)
                 ->where('ativo_no_grau', $grau)
                 ->exists();
+    }
+
+    public function showCadastroEtapa1()
+    {
+        return view('auth.cadastro.etapa1');
+    }
+
+
+    public function showCadastroEtapa2()
+    {
+        if (!session()->has('cadastro_etapa1')) {
+            return redirect()->route('cadastro.etapa1');
+        }
+
+        return view('auth.cadastro.etapa2');
+    }
+
+    public function processCadastroEtapa2(Request $request)
+    {
+        if (!session()->has('cadastro_etapa1')) {
+            return redirect()->route('cadastro.etapa1');
+        }
+
+        $request->validate([
+            'email' => 'required|email|max:255',
+            'telefone' => 'required|string|max:255',
+        ]);
+
+        // Salva os dados na sessão
+        session(['cadastro_etapa2' => [
+            'email' => $request->email,
+            'telefone' => $request->telefone
+        ]]);
+
+        return redirect()->route('cadastro.etapa3');
+    }
+
+    public function showCadastroEtapa3()
+    {
+        if (!session()->has('cadastro_etapa1') || !session()->has('cadastro_etapa2')) {
+            return redirect()->route('cadastro.etapa1');
+        }
+
+        return view('auth.cadastro.etapa3');
+    }
+
+    public function processCadastroEtapa3(Request $request)
+    {
+        if (!session()->has('cadastro_etapa1') || !session()->has('cadastro_etapa2')) {
+            return redirect()->route('cadastro.etapa1');
+        }
+
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Recupera os dados das etapas anteriores
+        $dadosEtapa1 = session('cadastro_etapa1');
+        $dadosEtapa2 = session('cadastro_etapa2');
+
+        try {
+            // Cria o usuário
+            $usuario = new Usuario();
+            $usuario->ime = $dadosEtapa1['ime'];
+            $usuario->cpf = $dadosEtapa1['cpf'];
+            $usuario->email = $dadosEtapa2['email'];
+            $usuario->telefone = $dadosEtapa2['telefone'];
+            $usuario->password = Hash::make($request->password);
+            $usuario->save();
+
+            // Limpa a sessão
+            session()->forget(['cadastro_etapa1', 'cadastro_etapa2']);
+
+            // Redireciona para o login com mensagem de sucesso
+            return redirect()->route('login')->with('success', 'Cadastro realizado com sucesso! Agora você pode fazer login.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erro ao cadastrar usuário. Por favor, tente novamente.');
+        }
     }
 }
